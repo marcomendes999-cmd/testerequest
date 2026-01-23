@@ -10,7 +10,7 @@ export default defineConfig({
   ],
   build: {
     outDir: 'public/build',
-    manifest: true,
+    manifest:'manifest.json',  // ← adiciona ou confirma esta linha: força nome e path sem subpasta,
     emptyOutDir: true,
   },
 })
