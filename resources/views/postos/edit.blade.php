@@ -1,0 +1,66 @@
+@extends('layouts.app')
+
+@section('title', 'Editar Posto de Trabalho')
+
+@section('content')
+    <div class="container mx-auto p-4 flex justify-center">
+        <div class="w-full max-w-lg bg-white rounded-lg shadow-lg p-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Editar Posto de Trabalho</h2>
+
+            <form action="{{ route('postos.update', $posto->id) }}" method="POST" class="space-y-4">
+                @csrf
+                @method('PUT')
+
+                <!-- Nome -->
+                <div class="mb-4">
+                    <label for="name" class="block text-gray-700 text-sm font-semibold mb-2">Nome do Posto</label>
+                    <input type="text" name="name" id="name" class="form-input w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400" value="{{ old('name', $posto->name) }}" required>
+                    @error('name')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Grupo -->
+                <div class="mb-4">
+                    <label for="grupo_id" class="block text-gray-700 text-sm font-semibold mb-2">Grupo de Trabalho</label>
+                    <select name="grupo_id" id="grupo_id" class="form-select w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                        @foreach($grupos as $grupo)
+                            <option value="{{ $grupo->id }}" {{ old('grupo_id', $posto->grupo_id) == $grupo->id ? 'selected' : '' }}>{{ $grupo->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('grupo_id')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Ordem -->
+                <div class="mb-4">
+                    <label for="ordem" class="block text-gray-700 text-sm font-semibold mb-2">Ordem</label>
+                    <input type="text" name="ordem" id="ordem" class="form-input w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400" value="{{ old('ordem', $posto->ordem) }}">
+                    @error('ordem')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Activo -->
+                <div class="mb-4 flex items-center">
+                    <input type="checkbox" name="activo" id="activo" value="1" class="form-checkbox h-5 w-5 text-blue-600 rounded-md focus:ring-2 focus:ring-blue-400" {{ old('activo', $posto->activo) ? 'checked' : '' }}>
+                    <label for="activo" class="ml-2 block text-sm text-gray-700 font-semibold">Ativo</label>
+                    @error('activo')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Botões -->
+                <div class="flex items-center justify-between mt-6">
+                    <a href="{{ route('postos.index') }}" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg shadow-sm hover:bg-gray-100 transition duration-300">
+                        <i class="fas fa-arrow-left mr-2"></i> Voltar
+                    </a>
+                    <button type="submit" class="px-6 py-2 bg-yellow-500 text-white rounded-lg shadow-lg hover:bg-yellow-600 transition duration-300 transform hover:scale-105">
+                        <i class="fas fa-save mr-2"></i> Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endsection
