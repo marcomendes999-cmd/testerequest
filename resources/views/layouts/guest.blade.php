@@ -13,10 +13,11 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <link rel="stylesheet" href="/build/assets/app-BUsT5kbZ.css">
+        <link rel="preload" as="style" href="/build/assets/app-BUsT5kbZ.css" />
+        <link rel="modulepreload" href="/build/assets/app-DlYOw6CL.js" />
+
     </head>
 
     <body class="font-sans text-gray-900 antialiased">
@@ -36,4 +37,4 @@
     </body>
 </html>
 
-<script type="module" src="/build/assets/app-DLYOw6CL.js"></script> 
+<script type="module" src="/build/assets/app-DlYOw6CL.js"></script> 

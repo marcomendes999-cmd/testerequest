@@ -15,7 +15,10 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+         <link rel="stylesheet" href="/build/assets/app-BUsT5kbZ.css">
+        <link rel="preload" as="style" href="/build/assets/app-BUsT5kbZ.css" />
+        <link rel="modulepreload" href="/build/assets/app-DlYOw6CL.js" />
+    
 
     <style>
         body {
@@ -132,3 +135,4 @@
     </div>
 </body>
 </html>
+<script type="module" src="/build/assets/app-DlYOw6CL.js"></script> 
