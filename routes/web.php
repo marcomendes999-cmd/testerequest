@@ -28,10 +28,15 @@ use App\Http\Controllers\TaskController;
 |
 */
 
-// Rotas públicas (sem autenticação)
+
 Route::get('/', function () {
-    return view('welcome');
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+
+    return redirect()->route('login');
 });
+
 
 // Rotas de autenticação do Laravel Breeze
 require __DIR__.'/auth.php';
