@@ -110,8 +110,8 @@ class TicketController extends Controller
             foreach ($request->file('files') as $file) {
                 $path = $file->store('tickets/files', 'public');
                 $ticket->files()->create([
-                    'name' => $file->getClientOriginalName(),
-                    'path' => $path,
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_path' => $path,
                 ]);
             }
         }
