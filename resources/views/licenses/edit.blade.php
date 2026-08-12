@@ -24,6 +24,21 @@
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+                <div class="mb-6">
+                    <label for="expires_at" class="block text-gray-700 text-sm font-semibold mb-2">Data de validade</label>
+                    <input type="date" name="expires_at" id="expires_at" value="{{ old('expires_at', optional($license->expires_at)->format('Y-m-d')) }}" class="form-input w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                    @error('expires_at')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <input type="hidden" name="ativo" value="0">
+                    <label for="ativo" class="flex cursor-pointer items-center gap-3 text-sm font-semibold text-gray-700">
+                        <input type="checkbox" name="ativo" id="ativo" value="1" @checked(old('ativo', $license->ativo)) class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        Licença ativa
+                    </label>
+                    <p class="mt-2 text-xs text-gray-500">Só pode existir uma licença ativa. Ao ativar esta, qualquer outra será desativada.</p>
+                </div>
                 <div class="flex items-center justify-between mt-6">
                     <a href="{{ route('licenses.index') }}" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg shadow-sm hover:bg-gray-100 transition duration-300">
                         <i class="fas fa-arrow-left mr-2"></i> Voltar

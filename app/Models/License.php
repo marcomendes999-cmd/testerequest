@@ -17,7 +17,21 @@ class License extends Model
     protected $fillable = [
         'name',
         'max_users',
+        'expires_at',
+        'ativo',
     ];
+
+    protected $casts = [
+        'expires_at' => 'date',
+        'ativo' => 'boolean',
+    ];
+
+    public function scopeActive($query)
+    {
+        return $query
+            ->where('ativo', true)
+            ->whereDate('expires_at', '>=', today());
+    }
 
     /**
      * Get the users for the license.

@@ -25,6 +25,12 @@ class Task extends Model
         'time',
     ];
 
+    protected $casts = [
+        'prazo' => 'date',
+        'data_ini' => 'datetime',
+        'disponivel' => 'boolean',
+    ];
+
     /**
      * Relação: Task pertence a um Ticket
      */
@@ -34,11 +40,27 @@ class Task extends Model
     }
 
     /**
-     * Relação: Task pertence a um User (operário/técnico)
+     * Relação: Task pertence a um User (o operário a quem foi atribuída)
      */
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Alias mais legível para user() — é o operário responsável por executar a task.
+     */
+    public function operario()
+    {
+        return $this->user();
+    }
+
+    /**
+     * Scope: tasks atribuídas a um determinado utilizador/operário.
+     */
+    public function scopeAtribuidasA($query, int $userId)
+    {
+        return $query->where('user_id', $userId);
     }
 
     /**
@@ -50,12 +72,11 @@ class Task extends Model
     }
 
     /**
-     * Relação opcional: Task pertence a um Posto/Unidade (un_id)
-     * — troca 'Un' pelo nome real do teu model/tabela se existir
+     * Relação: Task pertence a uma Unidade (un_id)
      */
     public function un()
     {
-        return $this->belongsTo(Un::class, 'un_id');
+        return $this->belongsTo(Unidade::class, 'un_id');
     }
 
     /**

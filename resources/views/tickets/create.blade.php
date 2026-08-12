@@ -5,7 +5,7 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg border-2 border-gray-100">
             <div class="p-8 bg-gray-50 border-b border-gray-200">
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">New Request</h2>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Novo pedido</h2>
                 <p class="text-gray-600 mb-6">Preencha os campos para abrir um novo pedido.</p>
                 
                 @if (session('success'))
@@ -35,14 +35,14 @@
                         </div-->
 
                         <div>
-                            <label for="idcategoria" class="block text-sm font-medium text-gray-700">Categoria</label>
-                            <select name="idcategoria" id="idcategoria" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150 ease-in-out" required>
-                                <option value="">Selecione a Categoria</option>
-                                @foreach($categorias as $categoria)
-                                    <option value="{{ $categoria->id }}" {{ old('idcategoria') == $categoria->id ? 'selected' : '' }}>{{ $categoria->name }}</option>
+                            <label for="grupo_id" class="block text-sm font-medium text-gray-700">Grupo</label>
+                            <select name="grupo_id" id="grupo_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition duration-150 ease-in-out" required>
+                                <option value="">Selecione o Grupo</option>
+                                @foreach($grupos as $grupo)
+                                    <option value="{{ $grupo->id }}" {{ old('grupo_id') == $grupo->id ? 'selected' : '' }}>{{ $grupo->name }}</option>
                                 @endforeach
                             </select>
-                            @error('idcategoria')
+                            @error('grupo_id')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>

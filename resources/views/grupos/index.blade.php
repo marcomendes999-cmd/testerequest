@@ -29,6 +29,7 @@
                             <th class="py-3 px-6 text-left">ID</th>
                             <th class="py-3 px-6 text-left">Nome</th>
                             <th class="py-3 px-6 text-left">Ordem</th>
+                            <th class="py-3 px-6 text-left">Colaborador responsável</th>
                             <th class="py-3 px-6 text-left">Ativo</th>
                             <th class="py-3 px-6 text-center">Ações</th>
                         </tr>
@@ -44,6 +45,9 @@
                                 </td>
                                 <td class="py-3 px-6 text-left">
                                     <span class="font-medium text-gray-700">{{ $grupo->ordem }}</span>
+                                </td>
+                                <td class="py-3 px-6 text-left">
+                                    <span class="font-medium text-gray-700">{{ $grupo->colaborador?->name ?? 'Sem responsável' }}</span>
                                 </td>
                                <td class="py-3 px-6 text-left">
                                     <span class="px-2 py-1 font-semibold leading-tight rounded-full {{ $grupo->activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">

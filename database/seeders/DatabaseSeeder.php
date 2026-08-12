@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,20 +13,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-       $this->call([
+        Schema::disableForeignKeyConstraints();
+
+        try {
+            $this->call([
           //  UserSeeder::class,
           //  TecnicoSeeder::class,
 
-            TicketSeeder::class,
+            RolesAndPermissionsSeeder::class,
             CategorySeeder::class,
             StatusSeeder::class,
             UrgencySeeder::class,
             SubcategorySeeder::class,
-            RolesAndPermissionsSeeder::class,
-          //  GrupoSeeder::class,
-          //  PostoSeeder::class,
-          //  UnSeeder::class,
-           // TasksTableSeeder::class,
-        ]);
+            GrupoSeeder::class,
+            PostoTrabalhoSeeder::class,
+            UnidadeSeeder::class,
+            TicketSeeder::class,
+            ]);
+        } finally {
+            Schema::enableForeignKeyConstraints();
+        }
     }
 }

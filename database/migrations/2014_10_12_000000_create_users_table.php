@@ -19,10 +19,6 @@ return new class extends Migration
             $table->string('password');
 
             // Novos campos
-            $table->string('numero', 4)->nullable(); // campo varchar(4)
-            $table->enum('tipo', ['cliente', 'fornecedor', 'colaborador'])->default('colaborador'); // tipo de usuário
-            $table->foreignId('empresa_id')->nullable()->constrained('empresas')->onDelete('set null'); // empresa opcional
-
             $table->rememberToken();
             $table->timestamps();
         });

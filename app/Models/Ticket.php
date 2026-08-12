@@ -36,6 +36,7 @@ class Ticket extends Model
         'datafecho' => 'datetime',
         'prazoini' => 'datetime',
         'prazotmp' => 'datetime',
+        'aprovado' => 'integer',
     ];
 
     public function categoria()
@@ -43,11 +44,10 @@ class Ticket extends Model
         return $this->belongsTo(Category::class, 'idcategoria');
     }
 
-   /* public function grupo()
+    public function grupo()
     {
         return $this->belongsTo(Grupo::class, 'grupo_id');
     }
-*/
     public function subcategoria()
     {
         return $this->belongsTo(Subcategory::class, 'idsubcategoria');

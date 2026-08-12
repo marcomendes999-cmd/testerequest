@@ -4,7 +4,7 @@
         {{-- LEFT SIDE — FIXED BANNER --}}
         <div class="hidden lg:flex relative">
             <img 
-                src="{{ asset('img/bannerpub2.png') }}" 
+                src="{{ asset('img/bannerpub2.jpg') }}" 
                 alt="Banner" 
                 style="height: 80%;margin-top: 15%;margin-left: 5%;" 
             >

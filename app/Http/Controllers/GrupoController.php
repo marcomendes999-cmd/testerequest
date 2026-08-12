@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Grupo;
+use App\Models\User;
+use App\Models\Tipo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class GrupoController extends Controller
 {
@@ -13,7 +16,7 @@ class GrupoController extends Controller
      */
     public function index()
     {
-        $grupos = Grupo::orderBy('ordem')->paginate(10);
+        $grupos = Grupo::with('colaborador')->orderBy('ordem')->paginate(10);
         return view('grupos.index', compact('grupos'));
     }
 
@@ -22,7 +25,9 @@ class GrupoController extends Controller
      */
     public function create()
     {
-        return view('grupos.create');
+        $colaboradores = $this->colaboradores();
+
+        return view('grupos.create', compact('colaboradores'));
     }
 
     /**
@@ -33,7 +38,10 @@ class GrupoController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'ordem' => 'nullable|string|max:4',
+            'colaborador_id' => 'nullable|exists:users,id',
         ]);
+
+        $this->validarColaborador($validatedData['colaborador_id'] ?? null, $request);
 
 
         Grupo::create($validatedData);
@@ -46,7 +54,9 @@ class GrupoController extends Controller
      */
     public function edit(Grupo $grupo)
     {
-        return view('grupos.edit', compact('grupo'));
+        $colaboradores = $this->colaboradores();
+
+        return view('grupos.edit', compact('grupo', 'colaboradores'));
     }
 
     /**
@@ -58,7 +68,10 @@ class GrupoController extends Controller
             'name' => 'required|string|max:255',
             'ordem' => 'nullable|string|max:4',
             'activo' => 'nullable|integer',
+            'colaborador_id' => 'nullable|exists:users,id',
         ]);
+
+        $this->validarColaborador($validatedData['colaborador_id'] ?? null, $request);
 
        // 
         $validatedData['activo'] = $request->has('activo') ? 1 : 0;
@@ -78,5 +91,19 @@ class GrupoController extends Controller
         $grupo->delete();
 
         return redirect()->route('grupos.index')->with('success', 'Grupo removido com sucesso!');
+    }
+
+    private function colaboradores()
+    {
+        return User::where('tipo_id', Tipo::colaboradorId())->orderBy('name')->get(['id', 'name', 'email']);
+    }
+
+    private function validarColaborador(?int $colaboradorId, Request $request): void
+    {
+        if ($colaboradorId && ! User::whereKey($colaboradorId)->where('tipo_id', Tipo::colaboradorId())->exists()) {
+            throw ValidationException::withMessages([
+                'colaborador_id' => 'O responsável selecionado tem de ser um utilizador do tipo colaborador.',
+            ]);
+        }
     }
 }

@@ -1,131 +1,108 @@
 @extends('layouts.app')
 
-@section('title', 'Lista de Tickets')
+@section('title', 'Lista de Pedidos')
 
 @section('content')
-<div 
-    x-data="ticketFilter()" 
-    x-init="init()" 
-    class="space-y-6"
->
-    <!-- Cabeçalho -->
-    <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-semibold text-gray-700">Lista de Requests</h2>
-        <a href="{{ route('tickets.create') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-200 shadow-md">
-            <i class="fas fa-plus mr-2"></i> New Request
-        </a>
+<div class="space-y-6">
+    <div>
+        <h2 class="text-2xl font-semibold text-gray-700">Lista de Pedidos</h2>
     </div>
 
-    <!-- Filtros -->
-    <div class="bg-white shadow-md rounded-lg p-4 flex flex-wrap gap-4 items-end">
-        <div class="flex flex-col">
-            <label class="text-sm font-medium text-gray-600 mb-1">Categoria</label>
-            <select x-model="filters.categoria" @change="applyFilters" class="border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="">Todas</option>
-                @foreach($categorias as $cat)
-                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                @endforeach
-            </select>
-        </div>
+    @if(session('success'))
+        <div class="rounded-lg border-l-4 border-green-500 bg-green-50 p-4 text-green-700">{{ session('success') }}</div>
+    @endif
 
+    <form method="GET" action="{{ route('tickets.index') }}" class="flex flex-wrap items-end gap-4 rounded-lg bg-white p-4 shadow-md">
         <div class="flex flex-col">
-            <label class="text-sm font-medium text-gray-600 mb-1">Estado</label>
-            <select x-model="filters.estado" @change="applyFilters" class="border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+            <label for="grupo_id" class="mb-1 text-sm font-medium text-gray-600">Grupo</label>
+            <select name="grupo_id" id="grupo_id" class="rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                 <option value="">Todos</option>
-                @foreach($estados as $est)
-                    <option value="{{ $est->id }}">{{ $est->name }}</option>
+                @foreach($grupos as $grupo)
+                    <option value="{{ $grupo->id }}" @selected((string) request('grupo_id') === (string) $grupo->id)>{{ $grupo->name }}</option>
                 @endforeach
             </select>
         </div>
 
-        <div class="flex flex-col flex-1">
-            <label class="text-sm font-medium text-gray-600 mb-1">Pesquisar</label>
-            <input 
-                type="text" 
-                x-model="filters.search" 
-                @input.debounce.500ms="applyFilters" 
-                class="border-gray-300 rounded-md w-full focus:ring-indigo-500 focus:border-indigo-500" 
-                placeholder="Pesquisar por título..."
-            >
+        <div class="flex flex-col">
+            <label for="estado" class="mb-1 text-sm font-medium text-gray-600">Estado</label>
+            <select name="estado" id="estado" class="rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                <option value="">Todos</option>
+                @foreach($estados as $estado)
+                    <option value="{{ $estado->id }}" @selected((string) request('estado') === (string) $estado->id)>{{ $estado->name }}</option>
+                @endforeach
+            </select>
         </div>
 
-        <button 
-            @click="clearFilters" 
-            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
-            Limpar
-        </button>
-    </div>
+        <div class="flex flex-col">
+            <label for="aprovado" class="mb-1 text-sm font-medium text-gray-600">Aprovação</label>
+            <select name="aprovado" id="aprovado" class="rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                <option value="">Todos</option>
+                <option value="2" @selected(request('aprovado') === '2')>Aprovado</option>
+                <option value="1" @selected(request('aprovado') === '1')>Não aprovado</option>
+            </select>
+        </div>
 
-    <!-- Tabela -->
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <table class="min-w-full leading-normal">
-            <thead>
-                <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-                    <th class="py-3 px-6 text-left">ID</th>
-                    <th class="py-3 px-6 text-left">Título</th>
-                    <th class="py-3 px-6 text-left">Descrição</th>
-                    <th class="py-3 px-6 text-left">Estado</th>
-                    <th class="py-3 px-6 text-left">Categoria</th>
-                    <th class="py-3 px-6 text-left">Prazo</th>
-                    <th class="py-3 px-6 text-center">Ações</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-600 text-sm font-light">
-                @foreach($tickets as $ticket)
-                    <tr class="border-b border-gray-200 hover:bg-gray-50">
-                        <td class="py-3 px-6">{{ $ticket->id }}</td>
-                        <td class="py-3 px-6">{{ $ticket->titulo }}</td>
-                        <td class="py-3 px-6">{{ Str::limit($ticket->descricao, 50) }}</td>
-                        <td class="py-3 px-6">{{ $ticket->estado->name ?? '' }}</td>
-                        <td class="py-3 px-6">{{ $ticket->categoria->name ?? '' }}</td>
-                        <td class="py-3 px-6">{{ $ticket->prazo ? \Carbon\Carbon::parse($ticket->prazo)->format('d/m/Y') : 'N/A' }}</td>
-                        <td class="py-3 px-6 text-center">
-                            <div class="flex justify-center space-x-2">
-                                <a href="{{ route('tickets.show', $ticket) }}" class="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center hover:bg-indigo-700" title="Ver"><i class="fas fa-eye"></i></a>
-                                 @role('tecnico')
-                                         <a href="{{ route('tickets.edit', $ticket) }}" class="w-8 h-8 rounded-full bg-yellow-500 text-white flex items-center justify-center hover:bg-yellow-700" title="Editar"><i class="fas fa-edit"></i></a>
-                                 @endrole
-                                <form action="{{ route('tickets.destroy', $ticket) }}" method="POST" class="inline-flex">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-700" title="Excluir" onclick="return confirm('Tem certeza que deseja excluir este ticket?');">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
+        <div class="flex flex-col">
+            <label for="search" class="mb-1 text-sm font-medium text-gray-600">Título</label>
+            <input type="search" name="search" id="search" value="{{ request('search') }}" placeholder="Pesquisar pedido" class="rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+        </div>
+
+        <div class="flex flex-col">
+            <label for="submetido_por" class="mb-1 text-sm font-medium text-gray-600">Submetido por</label>
+            <input type="search" name="submetido_por" id="submetido_por" value="{{ request('submetido_por') }}" placeholder="Nome do utilizador" class="rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+        </div>
+
+        <div class="flex gap-2">
+            <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 font-medium text-white transition hover:bg-indigo-700">Filtrar</button>
+            <a href="{{ route('tickets.index') }}" class="rounded-md border border-gray-300 px-4 py-2 font-medium text-gray-700 transition hover:bg-gray-50">Limpar</a>
+        </div>
+    </form>
+
+    <div class="overflow-hidden rounded-lg bg-white shadow-md">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
+                    <tr>
+                        <th class="px-6 py-3">Código</th>
+                        <th class="px-6 py-3">Título</th>
+                        <th class="px-6 py-3">Grupo</th>
+                        <th class="px-6 py-3">Submetido por</th>
+                        <th class="px-6 py-3">Estado</th>
+                        <th class="px-6 py-3">Prazo</th>
+                        <th class="px-6 py-3">Aprovação</th>
+                        <th class="px-6 py-3 text-right">Ações</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
+                    @forelse($tickets as $ticket)
+                        <tr class="transition hover:bg-gray-50">
+                            <td class="whitespace-nowrap px-6 py-4 font-semibold text-indigo-700">{{ $ticket->code ?? '—' }}</td>
+                            <td class="px-6 py-4 font-medium text-gray-900">{{ $ticket->titulo }}</td>
+                            <td class="px-6 py-4">{{ $ticket->grupo?->name ?? '—' }}</td>
+                            <td class="px-6 py-4">{{ $ticket->user?->name ?? '—' }}</td>
+                            <td class="px-6 py-4">{{ $ticket->estado?->name ?? '—' }}</td>
+                            <td class="whitespace-nowrap px-6 py-4">{{ $ticket->prazo?->format('d/m/Y') ?? '—' }}</td>
+                            <td class="px-6 py-4">
+                                @if((int) $ticket->aprovado === 2)
+                                    <span class="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-800">Aprovado</span>
+                                @else
+                                    <span class="inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-800">Não aprovado</span>
+                                @endif
+                            </td>
+                            <td class="whitespace-nowrap px-6 py-4 text-right">
+                                <a href="{{ route('tickets.show', $ticket) }}" class="font-medium text-indigo-600 hover:text-indigo-800">Ver detalhe</a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="px-6 py-10 text-center text-gray-500">Não existem pedidos com os filtros selecionados.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="mt-4">
-        {{ $tickets->links() }}
-    </div>
+    <div>{{ $tickets->links() }}</div>
 </div>
-
-<!-- Alpine.js Script -->
-<script>
-function ticketFilter() {
-    return {
-        filters: {
-            categoria: '{{ request('categoria') }}',
-            estado: '{{ request('estado') }}',
-            search: '{{ request('search') }}',
-        },
-        init() {
-            console.log('Filtros iniciados', this.filters);
-        },
-        applyFilters() {
-            const params = new URLSearchParams(this.filters).toString();
-            window.location = `?${params}`;
-        },
-        clearFilters() {
-            this.filters = { categoria: '', estado: '', search: '' };
-            this.applyFilters();
-        }
-    }
-}
-</script>
 @endsection

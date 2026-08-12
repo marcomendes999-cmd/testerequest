@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\License;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LicenseController extends Controller
 {
@@ -33,9 +34,17 @@ class LicenseController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'max_users' => 'required|integer|min:1',
+            'expires_at' => 'required|date|after_or_equal:today',
+            'ativo' => 'required|boolean',
         ]);
 
-        License::create($validatedData);
+        DB::transaction(function () use ($validatedData) {
+            if ($validatedData['ativo']) {
+                License::query()->update(['ativo' => false]);
+            }
+
+            License::create($validatedData);
+        });
 
         return redirect()->route('licenses.index')->with('success', 'Licença criada com sucesso!');
     }
@@ -56,9 +65,17 @@ class LicenseController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'max_users' => 'required|integer|min:1',
+            'expires_at' => 'required|date',
+            'ativo' => 'required|boolean',
         ]);
 
-        $license->update($validatedData);
+        DB::transaction(function () use ($license, $validatedData) {
+            if ($validatedData['ativo']) {
+                License::whereKeyNot($license->id)->update(['ativo' => false]);
+            }
+
+            $license->update($validatedData);
+        });
 
         return redirect()->route('licenses.index')->with('success', 'Licença atualizada com sucesso!');
     }

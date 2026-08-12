@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Editar Request')
+@section('title', 'Editar Pedido')
 
 @section('content')
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg border-2 border-gray-100">
                 <div class="p-8 bg-gray-50 border-b border-gray-200" x-data="{ activeTab: 'formulario' }">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Editar Request #{{ $ticket->id }}</h2>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Editar Pedido #{{ $ticket->code }}</h2>
                     <p class="text-gray-600 mb-6">Altere os campos para atualizar o pedido.</p>
 
                     @if (session('success'))
@@ -15,6 +15,28 @@
                             <span class="block sm:inline">{{ session('success') }}</span>
                         </div>
                     @endif
+
+                    @can('approve', $ticket)
+                        @if($ticket->aprovado === 2)
+                            <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
+                                <p class="text-sm font-semibold"><i class="fas fa-check-circle mr-1"></i>Pedido aprovado</p>
+                                <p class="mt-1 text-xs">A aprovação é definitiva e não pode ser retirada.</p>
+                            </div>
+                        @else
+                            <form action="{{ route('tickets.approval.update', $ticket) }}" method="POST" class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                                @csrf
+                                @method('PATCH')
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                                    <div>
+                                        <p class="text-sm font-semibold text-amber-900">Aprovacao do pedido</p>
+                                        <p class="mt-1 text-xs text-amber-800">Esta acao e definitiva e nao pode ser revertida.</p>
+                                    </div>
+                                    <input type="hidden" name="aprovado" value="2">
+                                    <button type="submit" class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-amber-700">Aprovar pedido</button>
+                                </div>
+                            </form>
+                        @endif
+                    @endcan
 
                     <!-- Abas -->
                     <div class="border-b border-gray-200">
@@ -28,11 +50,11 @@
                             <button @click="activeTab = 'ficheiros'" :class="{'border-indigo-500 text-indigo-600': activeTab === 'ficheiros', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'ficheiros'}" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none transition duration-150 ease-in-out">
                                 Ficheiros
                             </button>
-                             @role('tecnico')
+                             @can('create', [App\Models\Task::class, $ticket])
                             <button @click="activeTab = 'tasks'"
                                 :class="{ 'border-b-2 border-yellow-500 text-yellow-600': activeTab === 'tasks' }"
                                 class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-yellow-600">Tasks</button>
-                            @endrole
+                            @endcan
                         </nav>
                     </div>
 
@@ -40,7 +62,7 @@
                     <div class="mt-8">
                         <!-- Aba: Formulário -->
                         <div x-show="activeTab === 'formulario'">
-                            @role('tecnico')
+                        @can('update', $ticket)
                                 <!-- FORMULÁRIO EDITÁVEL PARA TÉCNICOS -->
                                 <form action="{{ route('tickets.update', $ticket) }}" method="POST" class="space-y-6">
                                     @csrf
@@ -52,23 +74,15 @@
                                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                 value="{{ old('titulo', $ticket->titulo) }}" required readonly>
                                         </div>
-
-                                        <div>
-                                            <label for="num_operario" class="block text-sm font-medium text-gray-700">Número</label>
-                                            <input type="text" name="num_operario" id="num_operario"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                value="{{ old('num_operario', $ticket->num_operario) }}" readonly >
-                                        </div>
-
-                                        <div>
-                                            <label for="idcategoria" class="block text-sm font-medium text-gray-700">Categoria</label>
-                                            <select name="idcategoria" id="idcategoria"
+<div>
+                                            <label for="grupo_id" class="block text-sm font-medium text-gray-700">Grupo</label>
+                                            <select name="grupo_id" id="grupo_id" disabled
                                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                 required>
-                                                <option value="">Selecione a Categoria</option>
-                                                @foreach($categorias as $categoria)
-                                                    <option value="{{ $categoria->id }}" {{ old('idcategoria', $ticket->idcategoria) == $categoria->id ? 'selected' : '' }}>
-                                                        {{ $categoria->name }}
+                                                <option value="">Selecione o Grupo</option>
+                                                @foreach($grupos as $grupo)
+                                                    <option value="{{ $grupo->id }}" {{ old('grupo_id', $ticket->grupo_id) == $grupo->id ? 'selected' : '' }}>
+                                                        {{ $grupo->name }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -76,9 +90,9 @@
 
                                         <div>
                                             <label for="idurgencia" class="block text-sm font-medium text-gray-700">Urgência</label>
-                                            <select name="idurgencia" id="idurgencia"
+                                            <select name="idurgencia" id="idurgencia" disabled
                                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                required readonly>
+                                                required>
                                                 <option value="">Selecione a Urgência</option>
                                                 @foreach($urgencias as $urgencia)
                                                     <option value="{{ $urgencia->id }}" {{ old('idurgencia', $ticket->idurgencia) == $urgencia->id ? 'selected' : '' }}>
@@ -90,7 +104,7 @@
 
                                         <div>
                                             <label for="idestado" class="block text-sm font-medium text-gray-700">Estado</label>
-                                            <select name="idestado" id="idestado"
+                                            <select name="idestado" id="idestado" disabled
                                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                 required>
                                                 <option value="">Selecione o Estado</option>
@@ -106,14 +120,14 @@
                                             <label for="prazo" class="block text-sm font-medium text-gray-700">Prazo</label>
                                             <input type="date" name="prazo" id="prazo"
                                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                value="{{ old('prazo', $ticket->prazo ? \Carbon\Carbon::parse($ticket->prazo)->format('Y-m-d') : null) }}" readonly>
+                                                value="{{ old('prazo', $ticket->prazo ? \Carbon\Carbon::parse($ticket->prazo)->format('Y-m-d') : null) }}">
                                         </div>
 
                                         <div class="md:col-span-2">
                                             <label for="descricao" class="block text-sm font-medium text-gray-700">Descrição</label>
                                             <textarea name="descricao" id="descricao" rows="4"
                                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                required readonly>{{ old('descricao', $ticket->descricao) }}</textarea>
+                                                required>{{ old('descricao', $ticket->descricao) }}</textarea>
                                         </div>
                                     </div>
 
@@ -128,7 +142,7 @@
                                         </button>
                                     </div>
                                 </form>
-                            @elserole('cliente')
+                            @else
                                 <!-- VERSÃO SOMENTE LEITURA PARA CLIENTES -->
                                 <div class="space-y-6 bg-gray-50 p-6 rounded-md border border-gray-200">
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -137,12 +151,8 @@
                                             <p class="mt-1 text-gray-900 font-semibold">{{ $ticket->titulo }}</p>
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700">Número do Operário</label>
-                                            <p class="mt-1 text-gray-900">{{ $ticket->num_operario ?? 'N/A' }}</p>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">Categoria</label>
-                                            <p class="mt-1 text-gray-900">{{ $ticket->categoria->name ?? 'N/A' }}</p>
+                                            <label class="block text-sm font-medium text-gray-700">Grupo</label>
+                                            <p class="mt-1 text-gray-900">{{ $ticket->grupo->name ?? 'N/A' }}</p>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700">Urgência</label>
@@ -168,7 +178,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            @endrole
+                        @endcan
                         </div>
 
 
@@ -249,10 +259,19 @@
                             <!-- FORMULÁRIO PARA NOVA TASK -->
                             <form action="{{ route('tasks.store', $ticket) }}" method="POST" class="space-y-4 bg-gray-50 p-4 rounded-lg mb-6">
                                 @csrf
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Título</label>
                                         <input type="text" name="titulo" required class="w-full rounded-md border-gray-300 shadow-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Atribuir a</label>
+                                        <select name="user_id" class="w-full rounded-md border-gray-300 shadow-sm">
+                                            <option value="">Por atribuir</option>
+                                            @foreach($tecnicos as $tecnico)
+                                                <option value="{{ $tecnico->id }}">{{ $tecnico->name }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Prazo</label>
@@ -261,9 +280,8 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Estado</label>
                                         <select name="estado_id" class="w-full rounded-md border-gray-300 shadow-sm">
-                                            <option value="">Selecione...</option>
                                             @foreach($estados as $estado)
-                                                <option value="{{ $estado->id }}">{{ $estado->name }}</option>
+                                                <option value="{{ $estado->id }}" @selected((int) old('estado_id', 1) === (int) $estado->id)>{{ $estado->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -287,6 +305,7 @@
                                                 <tr>
                                                     <th class="px-4 py-2 text-left">Título</th>
                                                     <th class="px-4 py-2 text-left">Estado</th>
+                                                    <th class="px-4 py-2 text-left">Operário</th>
                                                     <th class="px-4 py-2 text-left">Prazo</th>
                                                     <th class="px-4 py-2 text-left">Ordem</th>
                                                     <th class="px-4 py-2 text-center">Ações</th>
@@ -297,12 +316,21 @@
                                                     <tr class="border-t">
                                                         <td class="px-4 py-2">{{ $task->titulo }}</td>
                                                         <td class="px-4 py-2">{{ $task->estado->name ?? '—' }}</td>
+                                                        <td class="px-4 py-2">{{ $task->user->name ?? '—' }}</td>
                                                         <td class="px-4 py-2">{{ $task->prazo ? \Carbon\Carbon::parse($task->prazo)->format('d/m/Y') : '—' }}</td>
                                                         <td class="px-4 py-2">{{ $task->ordem }}</td>
                                                         <td class="px-4 py-2 text-center space-x-2">
                                                             <!-- Botão Editar -->
                                                             <button 
-                                                                @click="showEditModal = true; taskToEdit = {{ $task->toJson() }}"
+                                                                @click="showEditModal = true; taskToEdit = @js([
+                                                                    'id' => $task->id,
+                                                                    'titulo' => $task->titulo,
+                                                                    'descricao' => $task->descricao,
+                                                                    'prazo' => $task->prazo?->format('Y-m-d'),
+                                                                    'ordem' => $task->ordem,
+                                                                    'user_id' => $task->user_id,
+                                                                    'estado_id' => $task->estado_id,
+                                                                ])"
                                                                 class="text-blue-500 hover:underline">
                                                                 Editar
                                                             </button>
@@ -319,7 +347,7 @@
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="5" class="px-4 py-4 text-center text-gray-500">
+                                                        <td colspan="6" class="px-4 py-4 text-center text-gray-500">
                                                             Sem tasks registadas.
                                                         </td>
                                                     </tr>
@@ -359,6 +387,16 @@
                                                             <label class="block text-gray-700 text-sm font-medium mb-1">Ordem</label>
                                                             <input type="number" name="ordem" x-model="taskToEdit.ordem" class="w-full border rounded p-2">
                                                         </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label class="block text-gray-700 text-sm font-medium mb-1">Atribuir a</label>
+                                                        <select name="user_id" x-model="taskToEdit.user_id" class="w-full border rounded p-2">
+                                                            <option value="">Por atribuir</option>
+                                                            @foreach($tecnicos as $tecnico)
+                                                                <option value="{{ $tecnico->id }}">{{ $tecnico->name }}</option>
+                                                            @endforeach
+                                                        </select>
                                                     </div>
 
                                                     <div>

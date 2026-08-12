@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('numero', 4)->nullable()->after('password'); // varchar(4) para número
-            $table->enum('tipo', ['cliente', 'fornecedor', 'operario'])->default('cliente')->after('numero'); // select box
+            $table->enum('tipo', ['cliente', 'fornecedor', 'colaborador'])->default('cliente')->after('numero'); // select box
         });
     }
 

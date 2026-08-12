@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\License;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,15 +28,25 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        $license = License::active()->orderByDesc('expires_at')->first();
+
         $request->authenticate();
 
         // Regenerate session id antes de gravar coisas na sessão
         $request->session()->regenerate();
 
-        // 🔎 Verifica a licença (mantém a tua lógica)
-        $license = DB::table('licenses')->first();
+        if (! $license && Auth::id() !== 1) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
 
-        if ($license) {
+            return redirect()->route('login')->withErrors([
+                'email' => 'Não existe uma licença ativa para aceder à plataforma.',
+            ]);
+        }
+
+        // 🔎 Verifica a licença (mantém a tua lógica)
+        if ($license && Auth::id() !== 1) {
             $threshold = now()->subMinutes(config('session.lifetime'))->getTimestamp();
 
             $activeUserIds = DB::table('sessions')

@@ -3,24 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
         'name',
         'email',
+        'profile_photo_path',
         'password',
         'numero', // novo campo varchar(4)
-        'tipo',   // novo campo enum (cliente, fornecedor, colaborador)
-        'empresa_id', // campo opcional FK para empresa
+        'tipo_id',
+        'posto_id',
+        'unidade_id',
     ];
 
     protected $hidden = [
@@ -39,9 +42,19 @@ class User extends Authenticatable
         return $this->hasMany(UserLoginHistory::class, 'user_id');
     }
 
-    // Relacionamento opcional com empresa
-    public function empresa(): BelongsTo
+    public function posto(): BelongsTo
     {
-        return $this->belongsTo(Empresa::class, 'empresa_id');
+        return $this->belongsTo(Posto::class);
     }
+
+    public function unidade(): BelongsTo
+    {
+        return $this->belongsTo(Unidade::class);
+    }
+
+    public function tipo(): BelongsTo
+    {
+        return $this->belongsTo(Tipo::class);
+    }
+
 }

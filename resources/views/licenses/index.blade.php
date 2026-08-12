@@ -31,6 +31,8 @@
                             <th class="py-3 px-6 text-left">ID</th>
                             <th class="py-3 px-6 text-left">Nome</th>
                             <th class="py-3 px-6 text-left">Utilizadores Máximos</th>
+                            <th class="py-3 px-6 text-left">Validade</th>
+                            <th class="py-3 px-6 text-left">Estado</th>
                             <th class="py-3 px-6 text-center">Ações</th>
                         </tr>
                     </thead>
@@ -45,6 +47,16 @@
                                 </td>
                                 <td class="py-3 px-6 text-left">
                                     <span class="font-medium text-gray-700">{{ $license->max_users }}</span>
+                                </td>
+                                <td class="py-3 px-6 text-left">
+                                    <span class="font-medium text-gray-700">{{ optional($license->expires_at)->format('d/m/Y') }}</span>
+                                </td>
+                                <td class="py-3 px-6 text-left">
+                                    @if($license->ativo)
+                                        <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">Ativa</span>
+                                    @else
+                                        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">Inativa</span>
+                                    @endif
                                 </td>
                                 <td class="py-3 px-6 text-center">
                                     <div class="flex item-center justify-center space-x-2">
